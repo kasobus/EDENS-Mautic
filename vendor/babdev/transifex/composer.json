@@ -1,0 +1,37 @@
+{
+    "name": "babdev/transifex",
+    "description": "The Transifex API Package is a wrapper of the Transifex API available for PHP developers",
+    "keywords": ["php", "transifex"],
+    "homepage": "https://github.com/BabDev/Transifex-API",
+    "license": "GPL-2.0+",
+    "authors": [
+        {
+            "name": "Michael Babker",
+            "homepage": "http://www.babdev.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.10",
+        "joomla/http": "~1.1"
+    },
+    "require-dev": {
+        "joomla/test": "~1.0",
+        "phpunit/phpunit": "4.*",
+        "squizlabs/php_codesniffer": "1.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "BabDev\\Transifex\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "BabDev\\Transifex\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.x-dev"
+        }
+    }
+}
