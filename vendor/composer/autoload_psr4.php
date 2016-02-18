@@ -6,16 +6,15 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Webfactory\\Bundle\\ExceptionsBundle\\' => array($vendorDir . '/webfactory/exceptions-bundle'),
     'Symfony\\Bundle\\SwiftmailerBundle\\' => array($vendorDir . '/symfony/swiftmailer-bundle'),
     'Symfony\\Bundle\\MonologBundle\\' => array($vendorDir . '/symfony/monolog-bundle'),
     'OAuth2\\' => array($vendorDir . '/friendsofsymfony/oauth2-php/lib'),
     'Monolog\\' => array($vendorDir . '/monolog/monolog/src/Monolog'),
+    'MaxMind\\' => array($vendorDir . '/maxmind/web-service-common/src'),
     'Mautic\\AddonBundle\\Bundle\\' => array($baseDir . '/app/bundles/PluginBundle/Bundle/BC'),
     'Mautic\\' => array($baseDir . '/app/bundles'),
     'MauticPlugin\\' => array($baseDir . '/plugins'),
     'MauticAddon\\' => array($baseDir . '/addons'),
-    'Liip\\FunctionalTestBundle\\' => array($vendorDir . '/liip/functional-test-bundle'),
     'Knp\\Bundle\\MenuBundle\\' => array($vendorDir . '/knplabs/knp-menu-bundle'),
     'Joomla\\Uri\\Tests\\' => array($vendorDir . '/joomla/uri/Tests'),
     'Joomla\\Uri\\' => array($vendorDir . '/joomla/uri/src'),
@@ -23,7 +22,7 @@ return array(
     'Joomla\\Http\\' => array($vendorDir . '/joomla/http/src'),
     'Joomla\\Filter\\Tests\\' => array($vendorDir . '/joomla/filter/Tests'),
     'Joomla\\Filter\\' => array($vendorDir . '/joomla/filter/src'),
+    'GeoIp2\\' => array($vendorDir . '/geoip2/geoip2/src'),
     'Doctrine\\Bundle\\DoctrineBundle\\' => array($vendorDir . '/doctrine/doctrine-bundle'),
     'Bazinga\\OAuthServerBundle\\' => array($vendorDir . '/willdurand/oauth-server-bundle'),
-    'BabDev\\Transifex\\' => array($vendorDir . '/babdev/transifex/src'),
 );

@@ -586,17 +586,25 @@ class AjaxController extends CommonAjaxController
      */
     protected function updateLeadFieldValuesAction(Request $request)
     {
-        $alias      = InputHelper::clean($request->request->get('alias'));
-        $dataArray  = array('success' => 0, 'options' => null);
-        $leadField  = $this->factory->getModel('lead.field')->getRepository()->findOneBy(array('alias' => $alias));
+        $alias       = InputHelper::clean($request->request->get('alias'));
+        $dataArray   = array('success' => 0, 'options' => null);
+        $leadField   = $this->factory->getModel('lead.field')->getRepository()->findOneBy(array('alias' => $alias));
+        $choiceTypes = array('boolean', 'country', 'region', 'lookup', 'timezone', 'select', 'radio');
 
-        if ($leadField) {
+        if ($leadField && in_array($leadField->getType(), $choiceTypes)) {
             $properties = $leadField->getProperties();
-
+            $fieldType  = $leadField->getType();
             if (!empty($properties['list'])) {
                 // Lookup/Select options
                 $options = explode('|', $properties['list']);
-            } else {
+            } elseif (!empty($properties) && $fieldType == 'boolean') {
+                // Boolean options
+                $options = array(
+                    0 => $properties['no'],
+                    1 => $properties['yes']
+                );
+            } elseif (!empty($properties)) {
+                // fallback
                 $options = $properties;
             }
             $dataArray['options'] = $options;

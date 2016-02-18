@@ -208,6 +208,7 @@ class appProdProjectContainer extends Container
             'mautic.email.type.email_abtest_settings' => 'getMautic_Email_Type_EmailAbtestSettingsService',
             'mautic.email.webhook.subscriber' => 'getMautic_Email_Webhook_SubscriberService',
             'mautic.emailbuilder.subscriber' => 'getMautic_Emailbuilder_SubscriberService',
+            'mautic.emailtoken.subscriber' => 'getMautic_Emailtoken_SubscriberService',
             'mautic.exception.listener' => 'getMautic_Exception_ListenerService',
             'mautic.factory' => 'getMautic_FactoryService',
             'mautic.form.calendarbundle.subscriber' => 'getMautic_Form_Calendarbundle_SubscriberService',
@@ -237,6 +238,7 @@ class appProdProjectContainer extends Container
             'mautic.form.type.cloudstorage.rackspace' => 'getMautic_Form_Type_Cloudstorage_RackspaceService',
             'mautic.form.type.config' => 'getMautic_Form_Type_ConfigService',
             'mautic.form.type.coreconfig' => 'getMautic_Form_Type_CoreconfigService',
+            'mautic.form.type.coreconfig.iplookup_download_data_store_button' => 'getMautic_Form_Type_Coreconfig_IplookupDownloadDataStoreButtonService',
             'mautic.form.type.coreconfig_monitored_email' => 'getMautic_Form_Type_CoreconfigMonitoredEmailService',
             'mautic.form.type.coreconfig_monitored_mailboxes' => 'getMautic_Form_Type_CoreconfigMonitoredMailboxesService',
             'mautic.form.type.dynamiclist' => 'getMautic_Form_Type_DynamiclistService',
@@ -349,6 +351,15 @@ class appProdProjectContainer extends Container
             'mautic.helper.template.security' => 'getMautic_Helper_Template_SecurityService',
             'mautic.helper.theme' => 'getMautic_Helper_ThemeService',
             'mautic.helper.update' => 'getMautic_Helper_UpdateService',
+            'mautic.http.connector' => 'getMautic_Http_ConnectorService',
+            'mautic.install.configurator.step.check' => 'getMautic_Install_Configurator_Step_CheckService',
+            'mautic.install.configurator.step.doctrine' => 'getMautic_Install_Configurator_Step_DoctrineService',
+            'mautic.install.configurator.step.email' => 'getMautic_Install_Configurator_Step_EmailService',
+            'mautic.install.configurator.step.user' => 'getMautic_Install_Configurator_Step_UserService',
+            'mautic.ip_lookup' => 'getMautic_IpLookupService',
+            'mautic.ip_lookup.factory' => 'getMautic_IpLookup_FactoryService',
+            'mautic.kernel.listener.command_exception' => 'getMautic_Kernel_Listener_CommandExceptionService',
+            'mautic.kernel.listener.command_terminate' => 'getMautic_Kernel_Listener_CommandTerminateService',
             'mautic.lead.calendarbundle.subscriber' => 'getMautic_Lead_Calendarbundle_SubscriberService',
             'mautic.lead.campaignbundle.subscriber' => 'getMautic_Lead_Campaignbundle_SubscriberService',
             'mautic.lead.constraint.alias' => 'getMautic_Lead_Constraint_AliasService',
@@ -363,6 +374,7 @@ class appProdProjectContainer extends Container
             'mautic.menu.builder' => 'getMautic_Menu_BuilderService',
             'mautic.menu.main' => 'getMautic_Menu_MainService',
             'mautic.menu_renderer' => 'getMautic_MenuRendererService',
+            'mautic.monolog.fulltrace.formatter' => 'getMautic_Monolog_Fulltrace_FormatterService',
             'mautic.page.calendarbundle.subscriber' => 'getMautic_Page_Calendarbundle_SubscriberService',
             'mautic.page.campaignbundle.subscriber' => 'getMautic_Page_Campaignbundle_SubscriberService',
             'mautic.page.configbundle.subscriber' => 'getMautic_Page_Configbundle_SubscriberService',
@@ -373,6 +385,7 @@ class appProdProjectContainer extends Container
             'mautic.page.subscriber' => 'getMautic_Page_SubscriberService',
             'mautic.page.webhook.subscriber' => 'getMautic_Page_Webhook_SubscriberService',
             'mautic.pagebuilder.subscriber' => 'getMautic_Pagebuilder_SubscriberService',
+            'mautic.pagetoken.subscriber' => 'getMautic_Pagetoken_SubscriberService',
             'mautic.permission.manager' => 'getMautic_Permission_ManagerService',
             'mautic.permission.repository' => 'getMautic_Permission_RepositoryService',
             'mautic.plugin.campaignbundle.subscriber' => 'getMautic_Plugin_Campaignbundle_SubscriberService',
@@ -629,7 +642,7 @@ class appProdProjectContainer extends Container
         $a = new \Symfony\Bridge\Doctrine\ContainerAwareEventManager($this);
         $a->addEventSubscriber($this->get('mautic.tblprefix_subscriber'));
         $a->addEventSubscriber($this->get('mautic.lead.doctrine.subscriber'));
-        return $this->services['doctrine.dbal.default_connection'] = $this->get('doctrine.dbal.connection_factory')->createConnection(array('driver' => 'pdo_mysql', 'host' => 'localhost', 'port' => '8889', 'dbname' => 'Mautic', 'user' => 'root', 'password' => 'root', 'charset' => 'UTF8', 'driverOptions' => array()), new \Doctrine\DBAL\Configuration(), $a, array());
+        return $this->services['doctrine.dbal.default_connection'] = $this->get('doctrine.dbal.connection_factory')->createConnection(array('driver' => 'pdo_mysql', 'host' => 'localhost', 'port' => '8889', 'dbname' => 'Mautic', 'user' => 'root', 'password' => 'root', 'charset' => 'UTF8', 'driverOptions' => array()), new \Doctrine\DBAL\Configuration(), $a, array('enum' => 'string', 'point' => 'string', 'bit' => 'string'));
     }
     protected function getDoctrine_Orm_DefaultEntityListenerResolverService()
     {
@@ -707,6 +720,8 @@ class appProdProjectContainer extends Container
     protected function getEventDispatcherService()
     {
         $this->services['event_dispatcher'] = $instance = new \Symfony\Component\EventDispatcher\ContainerAwareEventDispatcher($this);
+        $instance->addListenerService('console.exception', array(0 => 'mautic.kernel.listener.command_exception', 1 => 'onConsoleException'), 0);
+        $instance->addListenerService('console.terminate', array(0 => 'mautic.kernel.listener.command_terminate', 1 => 'onConsoleTerminate'), 0);
         $instance->addListenerService('kernel.request', array(0 => 'knp_menu.listener.voters', 1 => 'onKernelRequest'), 0);
         $instance->addListenerService('kernel.request', array(0 => 'bazinga.oauth.event_listener.request', 1 => 'onEarlyKernelRequest'), 255);
         $instance->addListenerService('kernel.exception', array(0 => 'bazinga.oauth.event_listener.exception', 1 => 'onKernelException'), 0);
@@ -756,6 +771,7 @@ class appProdProjectContainer extends Container
         $instance->addSubscriberService('mautic.config.subscriber', 'Mautic\\ConfigBundle\\EventListener\\ConfigSubscriber');
         $instance->addSubscriberService('mautic.email.subscriber', 'Mautic\\EmailBundle\\EventListener\\EmailSubscriber');
         $instance->addSubscriberService('mautic.emailbuilder.subscriber', 'Mautic\\EmailBundle\\EventListener\\BuilderSubscriber');
+        $instance->addSubscriberService('mautic.emailtoken.subscriber', 'Mautic\\EmailBundle\\EventListener\\TokenSubscriber');
         $instance->addSubscriberService('mautic.email.campaignbundle.subscriber', 'Mautic\\EmailBundle\\EventListener\\CampaignSubscriber');
         $instance->addSubscriberService('mautic.email.formbundle.subscriber', 'Mautic\\EmailBundle\\EventListener\\FormSubscriber');
         $instance->addSubscriberService('mautic.email.reportbundle.subscriber', 'Mautic\\EmailBundle\\EventListener\\ReportSubscriber');
@@ -787,6 +803,7 @@ class appProdProjectContainer extends Container
         $instance->addSubscriberService('mautic.webhook.subscriber', 'Mautic\\LeadBundle\\EventListener\\WebhookSubscriber');
         $instance->addSubscriberService('mautic.page.subscriber', 'Mautic\\PageBundle\\EventListener\\PageSubscriber');
         $instance->addSubscriberService('mautic.pagebuilder.subscriber', 'Mautic\\PageBundle\\EventListener\\BuilderSubscriber');
+        $instance->addSubscriberService('mautic.pagetoken.subscriber', 'Mautic\\PageBundle\\EventListener\\TokenSubscriber');
         $instance->addSubscriberService('mautic.page.pointbundle.subscriber', 'Mautic\\PageBundle\\EventListener\\PointSubscriber');
         $instance->addSubscriberService('mautic.page.reportbundle.subscriber', 'Mautic\\PageBundle\\EventListener\\ReportSubscriber');
         $instance->addSubscriberService('mautic.page.campaignbundle.subscriber', 'Mautic\\PageBundle\\EventListener\\CampaignSubscriber');
@@ -832,7 +849,7 @@ class appProdProjectContainer extends Container
     }
     protected function getForm_RegistryService()
     {
-        return $this->services['form.registry'] = new \Symfony\Component\Form\FormRegistry(array(0 => new \Symfony\Component\Form\Extension\DependencyInjection\DependencyInjectionExtension($this, array('form' => 'form.type.form', 'birthday' => 'form.type.birthday', 'checkbox' => 'form.type.checkbox', 'choice' => 'form.type.choice', 'collection' => 'form.type.collection', 'country' => 'form.type.country', 'date' => 'form.type.date', 'datetime' => 'form.type.datetime', 'email' => 'form.type.email', 'file' => 'form.type.file', 'hidden' => 'form.type.hidden', 'integer' => 'form.type.integer', 'language' => 'form.type.language', 'locale' => 'form.type.locale', 'money' => 'form.type.money', 'number' => 'form.type.number', 'password' => 'form.type.password', 'percent' => 'form.type.percent', 'radio' => 'form.type.radio', 'repeated' => 'form.type.repeated', 'search' => 'form.type.search', 'textarea' => 'form.type.textarea', 'text' => 'form.type.text', 'time' => 'form.type.time', 'timezone' => 'form.type.timezone', 'url' => 'form.type.url', 'button' => 'form.type.button', 'submit' => 'form.type.submit', 'reset' => 'form.type.reset', 'currency' => 'form.type.currency', 'entity' => 'form.type.entity', 'fos_oauth_server_authorize' => 'fos_oauth_server.authorize.form.type', 'spacer' => 'mautic.form.type.spacer', 'tel' => 'mautic.form.type.tel', 'button_group' => 'mautic.form.type.button_group', 'yesno_button_group' => 'mautic.form.type.yesno_button_group', 'standalone_button' => 'mautic.form.type.standalone_button', 'form_buttons' => 'mautic.form.type.form_buttons', 'hidden_entity' => 'mautic.form.type.hidden_entity', 'sortablelist' => 'mautic.form.type.sortablelist', 'dynamiclist' => 'mautic.form.type.dynamiclist', 'coreconfig' => 'mautic.form.type.coreconfig', 'theme_list' => 'mautic.form.type.theme_list', 'client' => 'mautic.form.type.apiclients', 'apiconfig' => 'mautic.form.type.apiconfig', 'asset' => 'mautic.form.type.asset', 'pointaction_assetdownload' => 'mautic.form.type.pointaction_assetdownload', 'campaignevent_assetdownload' => 'mautic.form.type.campaignevent_assetdownload', 'asset_submitaction_downloadfile' => 'mautic.form.type.formsubmit_assetdownload', 'asset_list' => 'mautic.form.type.assetlist', 'assetconfig' => 'mautic.form.type.assetconfig', 'campaign' => 'mautic.campaign.type.form', 'campaignevent' => 'mautic.campaignrange.type.action', 'campaign_list' => 'mautic.campaign.type.campaignlist', 'campaignevent_leadchange' => 'mautic.campaign.type.trigger.leadchange', 'campaignevent_addremovelead' => 'mautic.campaign.type.action.addremovelead', 'campaignevent_canvassettings' => 'mautic.campaign.type.canvassettings', 'campaign_leadsource' => 'mautic.campaign.type.leadsource', 'category' => 'mautic.form.type.category', 'category_form' => 'mautic.form.type.category_form', 'category_bundles_form' => 'mautic.form.type.category_bundles_form', 'config' => 'mautic.form.type.config', 'emailform' => 'mautic.form.type.email', 'emailvariant' => 'mautic.form.type.emailvariant', 'email_list' => 'mautic.form.type.email_list', 'emailopen_list' => 'mautic.form.type.emailopen_list', 'emailsend_list' => 'mautic.form.type.emailsend_list', 'email_submitaction_useremail' => 'mautic.form.type.formsubmit_sendemail_admin', 'email_abtest_settings' => 'mautic.email.type.email_abtest_settings', 'batch_send' => 'mautic.email.type.batch_send', 'emailconfig' => 'mautic.form.type.emailconfig', 'monitored_mailboxes' => 'mautic.form.type.coreconfig_monitored_mailboxes', 'monitored_email' => 'mautic.form.type.coreconfig_monitored_email', 'mauticform' => 'mautic.form.type.form', 'formfield' => 'mautic.form.type.field', 'formaction' => 'mautic.form.type.action', 'formfield_text' => 'mautic.form.type.field_propertytext', 'formfield_placeholder' => 'mautic.form.type.field_propertyplaceholder', 'formfield_select' => 'mautic.form.type.field_propertyselect', 'formfield_captcha' => 'mautic.form.type.field_propertycaptcha', 'formfield_group' => 'mautic.form.type.field_propertygroup', 'pointaction_formsubmit' => 'mautic.form.type.pointaction_formsubmit', 'form_list' => 'mautic.form.type.form_list', 'campaignevent_formsubmit' => 'mautic.form.type.campaignevent_formsubmit', 'campaignevent_form_field_value' => 'mautic.form.type.campaignevent_form_field_value', 'form_submitaction_sendemail' => 'mautic.form.type.form_submitaction_sendemail', 'lead' => 'mautic.form.type.lead', 'leadlist' => 'mautic.form.type.leadlist', 'leadlist_choices' => 'mautic.form.type.leadlist_choices', 'leadlist_filter' => 'mautic.form.type.leadlist_filter', 'leadfield' => 'mautic.form.type.leadfield', 'lead_submitaction_pointschange' => 'mautic.form.type.lead.submitaction.pointschange', 'leadlist_action_type' => 'mautic.form.type.lead.submitaction.changelist', 'leadpoints_trigger' => 'mautic.form.type.leadpoints_trigger', 'leadpoints_action' => 'mautic.form.type.leadpoints_action', 'leadlist_trigger' => 'mautic.form.type.leadlist_trigger', 'leadlist_action' => 'mautic.form.type.leadlist_action', 'updatelead_action' => 'mautic.form.type.updatelead_action', 'leadnote' => 'mautic.form.type.leadnote', 'lead_import' => 'mautic.form.type.lead_import', 'lead_field_import' => 'mautic.form.type.lead_field_import', 'lead_quickemail' => 'mautic.form.type.lead_quickemail', 'lead_tags' => 'mautic.form.type.lead_tags', 'lead_tag' => 'mautic.form.type.lead_tag', 'modify_lead_tags' => 'mautic.form.type.modify_lead_tags', 'lead_batch' => 'mautic.form.type.lead_batch', 'lead_batch_dnc' => 'mautic.form.type.lead_batch_dnc', 'lead_merge' => 'mautic.form.type.lead_merge', 'campaignevent_lead_field_value' => 'mautic.form.type.campaignevent_lead_field_value', 'leadfields_choices' => 'mautic.form.type.lead_fields', 'page' => 'mautic.form.type.page', 'pagevariant' => 'mautic.form.type.pagevariant', 'pointaction_pagehit' => 'mautic.form.type.pointaction_pointhit', 'pointaction_urlhit' => 'mautic.form.type.pointaction_urlhit', 'campaignevent_pagehit' => 'mautic.form.type.pagehit.campaign_trigger', 'page_list' => 'mautic.form.type.pagelist', 'page_abtest_settings' => 'mautic.form.type.page_abtest_settings', 'page_publish_dates' => 'mautic.form.type.page_publish_dates', 'pageconfig' => 'mautic.form.type.pageconfig', 'slideshow_config' => 'mautic.form.type.slideshow_config', 'slideshow_slide_config' => 'mautic.form.type.slideshow_slide_config', 'redirect_list' => 'mautic.form.type.redirect_list', 'integration_details' => 'mautic.form.type.integration.details', 'integration_featuresettings' => 'mautic.form.type.integration.settings', 'integration_fields' => 'mautic.form.type.integration.fields', 'integration_keys' => 'mautic.form.type.integration.keys', 'integration_list' => 'mautic.form.type.integration.list', 'integration_config' => 'mautic.form.type.integration.config', 'point' => 'mautic.point.type.form', 'pointaction' => 'mautic.point.type.action', 'pointtrigger' => 'mautic.pointtrigger.type.form', 'pointtriggerevent' => 'mautic.pointtrigger.type.action', 'genericpoint_settings' => 'mautic.point.type.genericpoint_settings', 'report' => 'mautic.form.type.report', 'filter_selector' => 'mautic.form.type.filter_selector', 'table_order' => 'mautic.form.type.table_order', 'report_filters' => 'mautic.form.type.report_filters', 'user' => 'mautic.form.type.user', 'role' => 'mautic.form.type.role', 'permissions' => 'mautic.form.type.permissions', 'permissionlist' => 'mautic.form.type.permissionlist', 'passwordreset' => 'mautic.form.type.passwordreset', 'user_list' => 'mautic.form.type.user_list', 'webhook' => 'mautic.form.type.webhook', 'webhookconfig' => 'mautic.form.type.webhookconfig', 'cloudstorage_openstack' => 'mautic.form.type.cloudstorage.openstack', 'cloudstorage_rackspace' => 'mautic.form.type.cloudstorage.rackspace', 'emailmarketing_mailchimp' => 'mautic.form.type.emailmarketing.mailchimp', 'emailmarketing_constantcontact' => 'mautic.form.type.emailmarketing.constantcontact', 'emailmarketing_icontact' => 'mautic.form.type.emailmarketing.icontact', 'socialmedia_facebook' => 'mautic.form.type.social.facebook', 'socialmedia_twitter' => 'mautic.form.type.social.twitter', 'socialmedia_googleplus' => 'mautic.form.type.social.googleplus', 'socialmedia_linkedin' => 'mautic.form.type.social.linkedin'), array('form' => array(0 => 'form.type_extension.form.http_foundation', 1 => 'form.type_extension.form.validator', 2 => 'form.type_extension.csrf', 3 => 'fos_rest.form.extension.csrf_disable'), 'repeated' => array(0 => 'form.type_extension.repeated.validator'), 'submit' => array(0 => 'form.type_extension.submit.validator')), array(0 => 'form.type_guesser.validator', 1 => 'form.type_guesser.doctrine'))), $this->get('form.resolved_type_factory'));
+        return $this->services['form.registry'] = new \Symfony\Component\Form\FormRegistry(array(0 => new \Symfony\Component\Form\Extension\DependencyInjection\DependencyInjectionExtension($this, array('form' => 'form.type.form', 'birthday' => 'form.type.birthday', 'checkbox' => 'form.type.checkbox', 'choice' => 'form.type.choice', 'collection' => 'form.type.collection', 'country' => 'form.type.country', 'date' => 'form.type.date', 'datetime' => 'form.type.datetime', 'email' => 'form.type.email', 'file' => 'form.type.file', 'hidden' => 'form.type.hidden', 'integer' => 'form.type.integer', 'language' => 'form.type.language', 'locale' => 'form.type.locale', 'money' => 'form.type.money', 'number' => 'form.type.number', 'password' => 'form.type.password', 'percent' => 'form.type.percent', 'radio' => 'form.type.radio', 'repeated' => 'form.type.repeated', 'search' => 'form.type.search', 'textarea' => 'form.type.textarea', 'text' => 'form.type.text', 'time' => 'form.type.time', 'timezone' => 'form.type.timezone', 'url' => 'form.type.url', 'button' => 'form.type.button', 'submit' => 'form.type.submit', 'reset' => 'form.type.reset', 'currency' => 'form.type.currency', 'entity' => 'form.type.entity', 'fos_oauth_server_authorize' => 'fos_oauth_server.authorize.form.type', 'spacer' => 'mautic.form.type.spacer', 'tel' => 'mautic.form.type.tel', 'button_group' => 'mautic.form.type.button_group', 'yesno_button_group' => 'mautic.form.type.yesno_button_group', 'standalone_button' => 'mautic.form.type.standalone_button', 'form_buttons' => 'mautic.form.type.form_buttons', 'hidden_entity' => 'mautic.form.type.hidden_entity', 'sortablelist' => 'mautic.form.type.sortablelist', 'dynamiclist' => 'mautic.form.type.dynamiclist', 'coreconfig' => 'mautic.form.type.coreconfig', 'iplookup_download_data_store_button' => 'mautic.form.type.coreconfig.iplookup_download_data_store_button', 'theme_list' => 'mautic.form.type.theme_list', 'client' => 'mautic.form.type.apiclients', 'apiconfig' => 'mautic.form.type.apiconfig', 'asset' => 'mautic.form.type.asset', 'pointaction_assetdownload' => 'mautic.form.type.pointaction_assetdownload', 'campaignevent_assetdownload' => 'mautic.form.type.campaignevent_assetdownload', 'asset_submitaction_downloadfile' => 'mautic.form.type.formsubmit_assetdownload', 'asset_list' => 'mautic.form.type.assetlist', 'assetconfig' => 'mautic.form.type.assetconfig', 'campaign' => 'mautic.campaign.type.form', 'campaignevent' => 'mautic.campaignrange.type.action', 'campaign_list' => 'mautic.campaign.type.campaignlist', 'campaignevent_leadchange' => 'mautic.campaign.type.trigger.leadchange', 'campaignevent_addremovelead' => 'mautic.campaign.type.action.addremovelead', 'campaignevent_canvassettings' => 'mautic.campaign.type.canvassettings', 'campaign_leadsource' => 'mautic.campaign.type.leadsource', 'category' => 'mautic.form.type.category', 'category_form' => 'mautic.form.type.category_form', 'category_bundles_form' => 'mautic.form.type.category_bundles_form', 'config' => 'mautic.form.type.config', 'emailform' => 'mautic.form.type.email', 'emailvariant' => 'mautic.form.type.emailvariant', 'email_list' => 'mautic.form.type.email_list', 'emailopen_list' => 'mautic.form.type.emailopen_list', 'emailsend_list' => 'mautic.form.type.emailsend_list', 'email_submitaction_useremail' => 'mautic.form.type.formsubmit_sendemail_admin', 'email_abtest_settings' => 'mautic.email.type.email_abtest_settings', 'batch_send' => 'mautic.email.type.batch_send', 'emailconfig' => 'mautic.form.type.emailconfig', 'monitored_mailboxes' => 'mautic.form.type.coreconfig_monitored_mailboxes', 'monitored_email' => 'mautic.form.type.coreconfig_monitored_email', 'mauticform' => 'mautic.form.type.form', 'formfield' => 'mautic.form.type.field', 'formaction' => 'mautic.form.type.action', 'formfield_text' => 'mautic.form.type.field_propertytext', 'formfield_placeholder' => 'mautic.form.type.field_propertyplaceholder', 'formfield_select' => 'mautic.form.type.field_propertyselect', 'formfield_captcha' => 'mautic.form.type.field_propertycaptcha', 'formfield_group' => 'mautic.form.type.field_propertygroup', 'pointaction_formsubmit' => 'mautic.form.type.pointaction_formsubmit', 'form_list' => 'mautic.form.type.form_list', 'campaignevent_formsubmit' => 'mautic.form.type.campaignevent_formsubmit', 'campaignevent_form_field_value' => 'mautic.form.type.campaignevent_form_field_value', 'form_submitaction_sendemail' => 'mautic.form.type.form_submitaction_sendemail', 'lead' => 'mautic.form.type.lead', 'leadlist' => 'mautic.form.type.leadlist', 'leadlist_choices' => 'mautic.form.type.leadlist_choices', 'leadlist_filter' => 'mautic.form.type.leadlist_filter', 'leadfield' => 'mautic.form.type.leadfield', 'lead_submitaction_pointschange' => 'mautic.form.type.lead.submitaction.pointschange', 'leadlist_action_type' => 'mautic.form.type.lead.submitaction.changelist', 'leadpoints_trigger' => 'mautic.form.type.leadpoints_trigger', 'leadpoints_action' => 'mautic.form.type.leadpoints_action', 'leadlist_trigger' => 'mautic.form.type.leadlist_trigger', 'leadlist_action' => 'mautic.form.type.leadlist_action', 'updatelead_action' => 'mautic.form.type.updatelead_action', 'leadnote' => 'mautic.form.type.leadnote', 'lead_import' => 'mautic.form.type.lead_import', 'lead_field_import' => 'mautic.form.type.lead_field_import', 'lead_quickemail' => 'mautic.form.type.lead_quickemail', 'lead_tags' => 'mautic.form.type.lead_tags', 'lead_tag' => 'mautic.form.type.lead_tag', 'modify_lead_tags' => 'mautic.form.type.modify_lead_tags', 'lead_batch' => 'mautic.form.type.lead_batch', 'lead_batch_dnc' => 'mautic.form.type.lead_batch_dnc', 'lead_merge' => 'mautic.form.type.lead_merge', 'campaignevent_lead_field_value' => 'mautic.form.type.campaignevent_lead_field_value', 'leadfields_choices' => 'mautic.form.type.lead_fields', 'page' => 'mautic.form.type.page', 'pagevariant' => 'mautic.form.type.pagevariant', 'pointaction_pagehit' => 'mautic.form.type.pointaction_pointhit', 'pointaction_urlhit' => 'mautic.form.type.pointaction_urlhit', 'campaignevent_pagehit' => 'mautic.form.type.pagehit.campaign_trigger', 'page_list' => 'mautic.form.type.pagelist', 'page_abtest_settings' => 'mautic.form.type.page_abtest_settings', 'page_publish_dates' => 'mautic.form.type.page_publish_dates', 'pageconfig' => 'mautic.form.type.pageconfig', 'slideshow_config' => 'mautic.form.type.slideshow_config', 'slideshow_slide_config' => 'mautic.form.type.slideshow_slide_config', 'redirect_list' => 'mautic.form.type.redirect_list', 'integration_details' => 'mautic.form.type.integration.details', 'integration_featuresettings' => 'mautic.form.type.integration.settings', 'integration_fields' => 'mautic.form.type.integration.fields', 'integration_keys' => 'mautic.form.type.integration.keys', 'integration_list' => 'mautic.form.type.integration.list', 'integration_config' => 'mautic.form.type.integration.config', 'point' => 'mautic.point.type.form', 'pointaction' => 'mautic.point.type.action', 'pointtrigger' => 'mautic.pointtrigger.type.form', 'pointtriggerevent' => 'mautic.pointtrigger.type.action', 'genericpoint_settings' => 'mautic.point.type.genericpoint_settings', 'report' => 'mautic.form.type.report', 'filter_selector' => 'mautic.form.type.filter_selector', 'table_order' => 'mautic.form.type.table_order', 'report_filters' => 'mautic.form.type.report_filters', 'user' => 'mautic.form.type.user', 'role' => 'mautic.form.type.role', 'permissions' => 'mautic.form.type.permissions', 'permissionlist' => 'mautic.form.type.permissionlist', 'passwordreset' => 'mautic.form.type.passwordreset', 'user_list' => 'mautic.form.type.user_list', 'webhook' => 'mautic.form.type.webhook', 'webhookconfig' => 'mautic.form.type.webhookconfig', 'cloudstorage_openstack' => 'mautic.form.type.cloudstorage.openstack', 'cloudstorage_rackspace' => 'mautic.form.type.cloudstorage.rackspace', 'emailmarketing_mailchimp' => 'mautic.form.type.emailmarketing.mailchimp', 'emailmarketing_constantcontact' => 'mautic.form.type.emailmarketing.constantcontact', 'emailmarketing_icontact' => 'mautic.form.type.emailmarketing.icontact', 'socialmedia_facebook' => 'mautic.form.type.social.facebook', 'socialmedia_twitter' => 'mautic.form.type.social.twitter', 'socialmedia_googleplus' => 'mautic.form.type.social.googleplus', 'socialmedia_linkedin' => 'mautic.form.type.social.linkedin'), array('form' => array(0 => 'form.type_extension.form.http_foundation', 1 => 'form.type_extension.form.validator', 2 => 'form.type_extension.csrf', 3 => 'fos_rest.form.extension.csrf_disable'), 'repeated' => array(0 => 'form.type_extension.repeated.validator'), 'submit' => array(0 => 'form.type_extension.submit.validator')), array(0 => 'form.type_guesser.validator', 1 => 'form.type_guesser.doctrine'))), $this->get('form.resolved_type_factory'));
     }
     protected function getForm_ResolvedTypeFactoryService()
     {
@@ -1406,7 +1423,12 @@ class appProdProjectContainer extends Container
     }
     protected function getMautic_ConfiguratorService()
     {
-        return $this->services['mautic.configurator'] = new \Mautic\InstallBundle\Configurator\Configurator($this->targetDirs[2], $this->get('mautic.factory'));
+        $this->services['mautic.configurator'] = $instance = new \Mautic\InstallBundle\Configurator\Configurator($this->get('mautic.factory'));
+        $instance->addStep($this->get('mautic.install.configurator.step.check'), 0);
+        $instance->addStep($this->get('mautic.install.configurator.step.doctrine'), 1);
+        $instance->addStep($this->get('mautic.install.configurator.step.email'), 3);
+        $instance->addStep($this->get('mautic.install.configurator.step.user'), 2);
+        return $instance;
     }
     protected function getMautic_Core_Auditlog_SubscriberService()
     {
@@ -1479,6 +1501,10 @@ class appProdProjectContainer extends Container
     protected function getMautic_Emailbuilder_SubscriberService()
     {
         return $this->services['mautic.emailbuilder.subscriber'] = new \Mautic\EmailBundle\EventListener\BuilderSubscriber($this->get('mautic.factory'));
+    }
+    protected function getMautic_Emailtoken_SubscriberService()
+    {
+        return $this->services['mautic.emailtoken.subscriber'] = new \Mautic\EmailBundle\EventListener\TokenSubscriber($this->get('mautic.factory'));
     }
     protected function getMautic_Exception_ListenerService()
     {
@@ -1594,7 +1620,11 @@ class appProdProjectContainer extends Container
     }
     protected function getMautic_Form_Type_CoreconfigService()
     {
-        return $this->services['mautic.form.type.coreconfig'] = new \Mautic\CoreBundle\Form\Type\ConfigType($this->get('mautic.factory'));
+        return $this->services['mautic.form.type.coreconfig'] = new \Mautic\CoreBundle\Form\Type\ConfigType($this->get('translator.default'), $this->get('mautic.helper.language'), $this->get('mautic.ip_lookup.factory'), array('en_US' => 'English - United States'), array('freegeoip' => array('display_name' => 'Freegeoip.net', 'class' => 'Mautic\\CoreBundle\\IpLookup\\FreegeoipLookup'), 'geobytes' => array('display_name' => 'Geobytes', 'class' => 'Mautic\\CoreBundle\\IpLookup\\GeobytesLookup'), 'geoips' => array('display_name' => 'GeoIPs', 'class' => 'Mautic\\CoreBundle\\IpLookup\\GeoipsLookup'), 'ipinfodb' => array('display_name' => 'IPInfoDB', 'class' => 'Mautic\\CoreBundle\\IpLookup\\IpinfodbLookup'), 'maxmind_country' => array('display_name' => 'MaxMind - Country Geolocation', 'class' => 'Mautic\\CoreBundle\\IpLookup\\MaxmindCountryLookup'), 'maxmind_omni' => array('display_name' => 'MaxMind - Insights (formerly Omni)', 'class' => 'Mautic\\CoreBundle\\IpLookup\\MaxmindOmniLookup'), 'maxmind_precision' => array('display_name' => 'MaxMind - GeoIP2 Precision', 'class' => 'Mautic\\CoreBundle\\IpLookup\\MaxmindPrecisionLookup'), 'maxmind_download' => array('display_name' => 'MaxMind - GeoLite2 City Download', 'class' => 'Mautic\\CoreBundle\\IpLookup\\MaxmindDownloadLookup'), 'telize' => array('display_name' => 'Telize', 'class' => 'Mautic\\CoreBundle\\IpLookup\\TelizeLookup')), $this->get('mautic.ip_lookup'));
+    }
+    protected function getMautic_Form_Type_Coreconfig_IplookupDownloadDataStoreButtonService()
+    {
+        return $this->services['mautic.form.type.coreconfig.iplookup_download_data_store_button'] = new \Mautic\CoreBundle\Form\Type\IpLookupDownloadDataStoreButtonType($this->get('mautic.helper.template.date'), $this->get('translator.default'));
     }
     protected function getMautic_Form_Type_CoreconfigMonitoredEmailService()
     {
@@ -2044,6 +2074,42 @@ class appProdProjectContainer extends Container
     {
         return $this->services['mautic.helper.update'] = new \Mautic\CoreBundle\Helper\UpdateHelper($this->get('mautic.factory'));
     }
+    protected function getMautic_Http_ConnectorService()
+    {
+        return $this->services['mautic.http.connector'] = \Joomla\Http\HttpFactory::getHttp();
+    }
+    protected function getMautic_Install_Configurator_Step_CheckService()
+    {
+        return $this->services['mautic.install.configurator.step.check'] = new \Mautic\InstallBundle\Configurator\Step\CheckStep($this->get('mautic.configurator'), $this->targetDirs[2], $this->get('request_stack'));
+    }
+    protected function getMautic_Install_Configurator_Step_DoctrineService()
+    {
+        return $this->services['mautic.install.configurator.step.doctrine'] = new \Mautic\InstallBundle\Configurator\Step\DoctrineStep($this->get('mautic.configurator'));
+    }
+    protected function getMautic_Install_Configurator_Step_EmailService()
+    {
+        return $this->services['mautic.install.configurator.step.email'] = new \Mautic\InstallBundle\Configurator\Step\EmailStep($this->get('session'));
+    }
+    protected function getMautic_Install_Configurator_Step_UserService()
+    {
+        return $this->services['mautic.install.configurator.step.user'] = new \Mautic\InstallBundle\Configurator\Step\UserStep($this->get('session'));
+    }
+    protected function getMautic_IpLookupService()
+    {
+        return $this->services['mautic.ip_lookup'] = $this->get('mautic.ip_lookup.factory')->getService('maxmind_download', '', array(), $this->get('mautic.http.connector'));
+    }
+    protected function getMautic_IpLookup_FactoryService()
+    {
+        return $this->services['mautic.ip_lookup.factory'] = new \Mautic\CoreBundle\Factory\IpLookupFactory(array('freegeoip' => array('display_name' => 'Freegeoip.net', 'class' => 'Mautic\\CoreBundle\\IpLookup\\FreegeoipLookup'), 'geobytes' => array('display_name' => 'Geobytes', 'class' => 'Mautic\\CoreBundle\\IpLookup\\GeobytesLookup'), 'geoips' => array('display_name' => 'GeoIPs', 'class' => 'Mautic\\CoreBundle\\IpLookup\\GeoipsLookup'), 'ipinfodb' => array('display_name' => 'IPInfoDB', 'class' => 'Mautic\\CoreBundle\\IpLookup\\IpinfodbLookup'), 'maxmind_country' => array('display_name' => 'MaxMind - Country Geolocation', 'class' => 'Mautic\\CoreBundle\\IpLookup\\MaxmindCountryLookup'), 'maxmind_omni' => array('display_name' => 'MaxMind - Insights (formerly Omni)', 'class' => 'Mautic\\CoreBundle\\IpLookup\\MaxmindOmniLookup'), 'maxmind_precision' => array('display_name' => 'MaxMind - GeoIP2 Precision', 'class' => 'Mautic\\CoreBundle\\IpLookup\\MaxmindPrecisionLookup'), 'maxmind_download' => array('display_name' => 'MaxMind - GeoLite2 City Download', 'class' => 'Mautic\\CoreBundle\\IpLookup\\MaxmindDownloadLookup'), 'telize' => array('display_name' => 'Telize', 'class' => 'Mautic\\CoreBundle\\IpLookup\\TelizeLookup')), $this->get('monolog.logger.mautic'), $this->get('mautic.http.connector'), __DIR__);
+    }
+    protected function getMautic_Kernel_Listener_CommandExceptionService()
+    {
+        return $this->services['mautic.kernel.listener.command_exception'] = new \Mautic\CoreBundle\EventListener\ConsoleExceptionListener($this->get('monolog.logger.mautic'));
+    }
+    protected function getMautic_Kernel_Listener_CommandTerminateService()
+    {
+        return $this->services['mautic.kernel.listener.command_terminate'] = new \Mautic\CoreBundle\EventListener\ConsoleTerminateListener($this->get('monolog.logger.mautic'));
+    }
     protected function getMautic_Lead_Calendarbundle_SubscriberService()
     {
         return $this->services['mautic.lead.calendarbundle.subscriber'] = new \Mautic\LeadBundle\EventListener\CalendarSubscriber($this->get('mautic.factory'));
@@ -2100,6 +2166,12 @@ class appProdProjectContainer extends Container
     {
         return $this->services['mautic.menu_renderer'] = new \Mautic\CoreBundle\Menu\MenuRenderer($this->get('knp_menu.matcher'), $this->get('mautic.factory'), 'UTF-8');
     }
+    protected function getMautic_Monolog_Fulltrace_FormatterService()
+    {
+        $this->services['mautic.monolog.fulltrace.formatter'] = $instance = new \Monolog\Formatter\LineFormatter();
+        $instance->includeStacktraces(true);
+        return $instance;
+    }
     protected function getMautic_Page_Calendarbundle_SubscriberService()
     {
         return $this->services['mautic.page.calendarbundle.subscriber'] = new \Mautic\PageBundle\EventListener\CalendarSubscriber($this->get('mautic.factory'));
@@ -2139,6 +2211,10 @@ class appProdProjectContainer extends Container
     protected function getMautic_Pagebuilder_SubscriberService()
     {
         return $this->services['mautic.pagebuilder.subscriber'] = new \Mautic\PageBundle\EventListener\BuilderSubscriber($this->get('mautic.factory'));
+    }
+    protected function getMautic_Pagetoken_SubscriberService()
+    {
+        return $this->services['mautic.pagetoken.subscriber'] = new \Mautic\PageBundle\EventListener\TokenSubscriber($this->get('mautic.factory'));
     }
     protected function getMautic_Permission_ManagerService()
     {
@@ -2497,7 +2573,7 @@ class appProdProjectContainer extends Container
     {
         $a = $this->get('security.context');
         $b = $this->get('monolog.logger.security', ContainerInterface::NULL_ON_INVALID_REFERENCE);
-        return $this->services['security.firewall.map.context.dev'] = new \Symfony\Bundle\SecurityBundle\Security\FirewallContext(array(0 => $this->get('security.channel_listener'), 1 => new \Symfony\Component\Security\Http\Firewall\ContextListener($a, array(0 => $this->get('mautic.user.provider')), 'dev', $b, $this->get('event_dispatcher', ContainerInterface::NULL_ON_INVALID_REFERENCE)), 2 => new \Symfony\Component\Security\Http\Firewall\AnonymousAuthenticationListener($a, '566f41806f7958.82284492', $b, $this->get('security.authentication.manager')), 3 => $this->get('security.access_listener')), new \Symfony\Component\Security\Http\Firewall\ExceptionListener($a, $this->get('security.authentication.trust_resolver'), $this->get('security.http_utils'), 'dev', NULL, NULL, NULL, $b));
+        return $this->services['security.firewall.map.context.dev'] = new \Symfony\Bundle\SecurityBundle\Security\FirewallContext(array(0 => $this->get('security.channel_listener'), 1 => new \Symfony\Component\Security\Http\Firewall\ContextListener($a, array(0 => $this->get('mautic.user.provider')), 'dev', $b, $this->get('event_dispatcher', ContainerInterface::NULL_ON_INVALID_REFERENCE)), 2 => new \Symfony\Component\Security\Http\Firewall\AnonymousAuthenticationListener($a, '56b3a0589b1fc5.38428594', $b, $this->get('security.authentication.manager')), 3 => $this->get('security.access_listener')), new \Symfony\Component\Security\Http\Firewall\ExceptionListener($a, $this->get('security.authentication.trust_resolver'), $this->get('security.http_utils'), 'dev', NULL, NULL, NULL, $b));
     }
     protected function getSecurity_Firewall_Map_Context_InstallService()
     {
@@ -2507,7 +2583,7 @@ class appProdProjectContainer extends Container
     {
         $a = $this->get('security.context');
         $b = $this->get('monolog.logger.security', ContainerInterface::NULL_ON_INVALID_REFERENCE);
-        return $this->services['security.firewall.map.context.login'] = new \Symfony\Bundle\SecurityBundle\Security\FirewallContext(array(0 => $this->get('security.channel_listener'), 1 => $this->get('security.context_listener.1'), 2 => new \Symfony\Component\Security\Http\Firewall\AnonymousAuthenticationListener($a, '566f41806f7958.82284492', $b, $this->get('security.authentication.manager')), 3 => $this->get('security.access_listener')), new \Symfony\Component\Security\Http\Firewall\ExceptionListener($a, $this->get('security.authentication.trust_resolver'), $this->get('security.http_utils'), 'login', NULL, NULL, NULL, $b));
+        return $this->services['security.firewall.map.context.login'] = new \Symfony\Bundle\SecurityBundle\Security\FirewallContext(array(0 => $this->get('security.channel_listener'), 1 => $this->get('security.context_listener.1'), 2 => new \Symfony\Component\Security\Http\Firewall\AnonymousAuthenticationListener($a, '56b3a0589b1fc5.38428594', $b, $this->get('security.authentication.manager')), 3 => $this->get('security.access_listener')), new \Symfony\Component\Security\Http\Firewall\ExceptionListener($a, $this->get('security.authentication.trust_resolver'), $this->get('security.http_utils'), 'login', NULL, NULL, NULL, $b));
     }
     protected function getSecurity_Firewall_Map_Context_MainService()
     {
@@ -2518,7 +2594,7 @@ class appProdProjectContainer extends Container
         $e = $this->get('mautic.security.authentication_handler');
         $f = $this->get('security.authentication.manager');
         $g = $this->get('event_dispatcher', ContainerInterface::NULL_ON_INVALID_REFERENCE);
-        $h = new \Symfony\Component\Security\Http\RememberMe\TokenBasedRememberMeServices(array(0 => $b), '8c2d7f37728569f49127d2013ee16e82160223c8', 'main', array('lifetime' => 31536000, 'path' => '/', 'domain' => '', 'name' => 'REMEMBERME', 'secure' => false, 'httponly' => true, 'always_remember_me' => false, 'remember_me_parameter' => '_remember_me'), $c);
+        $h = new \Symfony\Component\Security\Http\RememberMe\TokenBasedRememberMeServices(array(0 => $b), 'e906b3d03b1f23d736f4792b214e9a67d812b24d', 'main', array('lifetime' => 31536000, 'path' => '/', 'domain' => '', 'name' => 'REMEMBERME', 'secure' => false, 'httponly' => true, 'always_remember_me' => false, 'remember_me_parameter' => '_remember_me'), $c);
         $i = new \Symfony\Component\Security\Http\Firewall\LogoutListener($d, $a, new \Symfony\Component\Security\Http\Logout\DefaultLogoutSuccessHandler($a, '/s/login'), array('csrf_parameter' => '_csrf_token', 'intention' => 'logout', 'logout_path' => '/s/logout'));
         $i->addHandler(new \Symfony\Component\Security\Http\Logout\SessionLogoutHandler());
         $i->addHandler($this->get('mautic.security.logout_handler'));
@@ -2544,7 +2620,7 @@ class appProdProjectContainer extends Container
         $g->setProviderKey('oauth1_area');
         $h = new \Symfony\Component\Security\Http\Authentication\DefaultAuthenticationFailureHandler($e, $d, array(), $b);
         $h->setOptions(array('login_path' => '/oauth/v1/authorize_login', 'failure_path' => NULL, 'failure_forward' => false, 'failure_path_parameter' => '_failure_path'));
-        return $this->services['security.firewall.map.context.oauth1_area'] = new \Symfony\Bundle\SecurityBundle\Security\FirewallContext(array(0 => $this->get('security.channel_listener'), 1 => new \Symfony\Component\Security\Http\Firewall\ContextListener($a, array(0 => $this->get('mautic.user.provider')), 'oauth1_area', $b, $c), 2 => new \Symfony\Component\Security\Http\Firewall\UsernamePasswordFormAuthenticationListener($a, $f, $this->get('security.authentication.session_strategy'), $d, 'oauth1_area', $g, $h, array('check_path' => '/oauth/v1/authorize_login_check', 'use_forward' => false, 'require_previous_session' => true, 'username_parameter' => '_username', 'password_parameter' => '_password', 'csrf_parameter' => '_csrf_token', 'intention' => 'authenticate', 'post_only' => true), $b, $c, NULL), 3 => new \Symfony\Component\Security\Http\Firewall\AnonymousAuthenticationListener($a, '566f41806f7958.82284492', $b, $f), 4 => $this->get('security.access_listener')), new \Symfony\Component\Security\Http\Firewall\ExceptionListener($a, $this->get('security.authentication.trust_resolver'), $d, 'oauth1_area', new \Symfony\Component\Security\Http\EntryPoint\FormAuthenticationEntryPoint($e, $d, '/oauth/v1/authorize_login', false), NULL, NULL, $b));
+        return $this->services['security.firewall.map.context.oauth1_area'] = new \Symfony\Bundle\SecurityBundle\Security\FirewallContext(array(0 => $this->get('security.channel_listener'), 1 => new \Symfony\Component\Security\Http\Firewall\ContextListener($a, array(0 => $this->get('mautic.user.provider')), 'oauth1_area', $b, $c), 2 => new \Symfony\Component\Security\Http\Firewall\UsernamePasswordFormAuthenticationListener($a, $f, $this->get('security.authentication.session_strategy'), $d, 'oauth1_area', $g, $h, array('check_path' => '/oauth/v1/authorize_login_check', 'use_forward' => false, 'require_previous_session' => true, 'username_parameter' => '_username', 'password_parameter' => '_password', 'csrf_parameter' => '_csrf_token', 'intention' => 'authenticate', 'post_only' => true), $b, $c, NULL), 3 => new \Symfony\Component\Security\Http\Firewall\AnonymousAuthenticationListener($a, '56b3a0589b1fc5.38428594', $b, $f), 4 => $this->get('security.access_listener')), new \Symfony\Component\Security\Http\Firewall\ExceptionListener($a, $this->get('security.authentication.trust_resolver'), $d, 'oauth1_area', new \Symfony\Component\Security\Http\EntryPoint\FormAuthenticationEntryPoint($e, $d, '/oauth/v1/authorize_login', false), NULL, NULL, $b));
     }
     protected function getSecurity_Firewall_Map_Context_Oauth1RequestTokenService()
     {
@@ -2563,7 +2639,7 @@ class appProdProjectContainer extends Container
         $g->setProviderKey('oauth2_area');
         $h = new \Symfony\Component\Security\Http\Authentication\DefaultAuthenticationFailureHandler($e, $d, array(), $b);
         $h->setOptions(array('login_path' => '/oauth/v2/authorize_login', 'failure_path' => NULL, 'failure_forward' => false, 'failure_path_parameter' => '_failure_path'));
-        return $this->services['security.firewall.map.context.oauth2_area'] = new \Symfony\Bundle\SecurityBundle\Security\FirewallContext(array(0 => $this->get('security.channel_listener'), 1 => new \Symfony\Component\Security\Http\Firewall\ContextListener($a, array(0 => $this->get('mautic.user.provider')), 'oauth2_area', $b, $c), 2 => new \Symfony\Component\Security\Http\Firewall\UsernamePasswordFormAuthenticationListener($a, $f, $this->get('security.authentication.session_strategy'), $d, 'oauth2_area', $g, $h, array('check_path' => '/oauth/v2/authorize_login_check', 'use_forward' => false, 'require_previous_session' => true, 'username_parameter' => '_username', 'password_parameter' => '_password', 'csrf_parameter' => '_csrf_token', 'intention' => 'authenticate', 'post_only' => true), $b, $c, NULL), 3 => new \Symfony\Component\Security\Http\Firewall\AnonymousAuthenticationListener($a, '566f41806f7958.82284492', $b, $f), 4 => $this->get('security.access_listener')), new \Symfony\Component\Security\Http\Firewall\ExceptionListener($a, $this->get('security.authentication.trust_resolver'), $d, 'oauth2_area', new \Symfony\Component\Security\Http\EntryPoint\FormAuthenticationEntryPoint($e, $d, '/oauth/v2/authorize_login', false), NULL, NULL, $b));
+        return $this->services['security.firewall.map.context.oauth2_area'] = new \Symfony\Bundle\SecurityBundle\Security\FirewallContext(array(0 => $this->get('security.channel_listener'), 1 => new \Symfony\Component\Security\Http\Firewall\ContextListener($a, array(0 => $this->get('mautic.user.provider')), 'oauth2_area', $b, $c), 2 => new \Symfony\Component\Security\Http\Firewall\UsernamePasswordFormAuthenticationListener($a, $f, $this->get('security.authentication.session_strategy'), $d, 'oauth2_area', $g, $h, array('check_path' => '/oauth/v2/authorize_login_check', 'use_forward' => false, 'require_previous_session' => true, 'username_parameter' => '_username', 'password_parameter' => '_password', 'csrf_parameter' => '_csrf_token', 'intention' => 'authenticate', 'post_only' => true), $b, $c, NULL), 3 => new \Symfony\Component\Security\Http\Firewall\AnonymousAuthenticationListener($a, '56b3a0589b1fc5.38428594', $b, $f), 4 => $this->get('security.access_listener')), new \Symfony\Component\Security\Http\Firewall\ExceptionListener($a, $this->get('security.authentication.trust_resolver'), $d, 'oauth2_area', new \Symfony\Component\Security\Http\EntryPoint\FormAuthenticationEntryPoint($e, $d, '/oauth/v2/authorize_login', false), NULL, NULL, $b));
     }
     protected function getSecurity_Firewall_Map_Context_Oauth2TokenService()
     {
@@ -2573,7 +2649,7 @@ class appProdProjectContainer extends Container
     {
         $a = $this->get('security.context');
         $b = $this->get('monolog.logger.security', ContainerInterface::NULL_ON_INVALID_REFERENCE);
-        return $this->services['security.firewall.map.context.public'] = new \Symfony\Bundle\SecurityBundle\Security\FirewallContext(array(0 => $this->get('security.channel_listener'), 1 => $this->get('security.context_listener.1'), 2 => new \Symfony\Component\Security\Http\Firewall\AnonymousAuthenticationListener($a, '566f41806f7958.82284492', $b, $this->get('security.authentication.manager')), 3 => $this->get('security.access_listener')), new \Symfony\Component\Security\Http\Firewall\ExceptionListener($a, $this->get('security.authentication.trust_resolver'), $this->get('security.http_utils'), 'public', NULL, NULL, NULL, $b));
+        return $this->services['security.firewall.map.context.public'] = new \Symfony\Bundle\SecurityBundle\Security\FirewallContext(array(0 => $this->get('security.channel_listener'), 1 => $this->get('security.context_listener.1'), 2 => new \Symfony\Component\Security\Http\Firewall\AnonymousAuthenticationListener($a, '56b3a0589b1fc5.38428594', $b, $this->get('security.authentication.manager')), 3 => $this->get('security.access_listener')), new \Symfony\Component\Security\Http\Firewall\ExceptionListener($a, $this->get('security.authentication.trust_resolver'), $this->get('security.http_utils'), 'public', NULL, NULL, NULL, $b));
     }
     protected function getSecurity_PasswordEncoderService()
     {
@@ -3066,7 +3142,7 @@ class appProdProjectContainer extends Container
         $c = new \Symfony\Component\Security\Core\User\UserChecker();
         $d = new \Mautic\ApiBundle\Security\OAuth1\Authentication\Provider\OAuthProvider($a, $this->get('bazinga.oauth.server_service'), '');
         $d->setFactory($this->get('mautic.factory'));
-        $this->services['security.authentication.manager'] = $instance = new \Symfony\Component\Security\Core\Authentication\AuthenticationProviderManager(array(0 => new \Symfony\Component\Security\Core\Authentication\Provider\AnonymousAuthenticationProvider('566f41806f7958.82284492'), 1 => new \Symfony\Component\Security\Core\Authentication\Provider\AnonymousAuthenticationProvider('566f41806f7958.82284492'), 2 => new \Symfony\Component\Security\Core\Authentication\Provider\DaoAuthenticationProvider($a, $c, 'oauth2_area', $b, true), 3 => new \Symfony\Component\Security\Core\Authentication\Provider\AnonymousAuthenticationProvider('566f41806f7958.82284492'), 4 => new \Symfony\Component\Security\Core\Authentication\Provider\DaoAuthenticationProvider($a, $c, 'oauth1_area', $b, true), 5 => new \Symfony\Component\Security\Core\Authentication\Provider\AnonymousAuthenticationProvider('566f41806f7958.82284492'), 6 => new \FOS\OAuthServerBundle\Security\Authentication\Provider\OAuthProvider($a, $this->get('fos_oauth_server.server'), $c), 7 => $d, 8 => new \Symfony\Component\Security\Core\Authentication\Provider\DaoAuthenticationProvider($a, $c, 'main', $b, true), 9 => new \Symfony\Component\Security\Core\Authentication\Provider\RememberMeAuthenticationProvider($c, '8c2d7f37728569f49127d2013ee16e82160223c8', 'main'), 10 => new \Symfony\Component\Security\Core\Authentication\Provider\AnonymousAuthenticationProvider('566f41806f7958.82284492')), true);
+        $this->services['security.authentication.manager'] = $instance = new \Symfony\Component\Security\Core\Authentication\AuthenticationProviderManager(array(0 => new \Symfony\Component\Security\Core\Authentication\Provider\AnonymousAuthenticationProvider('56b3a0589b1fc5.38428594'), 1 => new \Symfony\Component\Security\Core\Authentication\Provider\AnonymousAuthenticationProvider('56b3a0589b1fc5.38428594'), 2 => new \Symfony\Component\Security\Core\Authentication\Provider\DaoAuthenticationProvider($a, $c, 'oauth2_area', $b, true), 3 => new \Symfony\Component\Security\Core\Authentication\Provider\AnonymousAuthenticationProvider('56b3a0589b1fc5.38428594'), 4 => new \Symfony\Component\Security\Core\Authentication\Provider\DaoAuthenticationProvider($a, $c, 'oauth1_area', $b, true), 5 => new \Symfony\Component\Security\Core\Authentication\Provider\AnonymousAuthenticationProvider('56b3a0589b1fc5.38428594'), 6 => new \FOS\OAuthServerBundle\Security\Authentication\Provider\OAuthProvider($a, $this->get('fos_oauth_server.server'), $c), 7 => $d, 8 => new \Symfony\Component\Security\Core\Authentication\Provider\DaoAuthenticationProvider($a, $c, 'main', $b, true), 9 => new \Symfony\Component\Security\Core\Authentication\Provider\RememberMeAuthenticationProvider($c, 'e906b3d03b1f23d736f4792b214e9a67d812b24d', 'main'), 10 => new \Symfony\Component\Security\Core\Authentication\Provider\AnonymousAuthenticationProvider('56b3a0589b1fc5.38428594')), true);
         $instance->setEventDispatcher($this->get('event_dispatcher'));
         return $instance;
     }
@@ -3319,8 +3395,62 @@ class appProdProjectContainer extends Container
                                 ),
                                 'mautic.form.type.coreconfig' => array(
                                     'class' => 'Mautic\\CoreBundle\\Form\\Type\\ConfigType',
-                                    'arguments' => 'mautic.factory',
+                                    'arguments' => array(
+                                        0 => 'translator',
+                                        1 => 'mautic.helper.language',
+                                        2 => 'mautic.ip_lookup.factory',
+                                        3 => array(
+                                            'en_US' => 'English - United States',
+                                        ),
+                                        4 => array(
+                                            'freegeoip' => array(
+                                                'display_name' => 'Freegeoip.net',
+                                                'class' => 'Mautic\\CoreBundle\\IpLookup\\FreegeoipLookup',
+                                            ),
+                                            'geobytes' => array(
+                                                'display_name' => 'Geobytes',
+                                                'class' => 'Mautic\\CoreBundle\\IpLookup\\GeobytesLookup',
+                                            ),
+                                            'geoips' => array(
+                                                'display_name' => 'GeoIPs',
+                                                'class' => 'Mautic\\CoreBundle\\IpLookup\\GeoipsLookup',
+                                            ),
+                                            'ipinfodb' => array(
+                                                'display_name' => 'IPInfoDB',
+                                                'class' => 'Mautic\\CoreBundle\\IpLookup\\IpinfodbLookup',
+                                            ),
+                                            'maxmind_country' => array(
+                                                'display_name' => 'MaxMind - Country Geolocation',
+                                                'class' => 'Mautic\\CoreBundle\\IpLookup\\MaxmindCountryLookup',
+                                            ),
+                                            'maxmind_omni' => array(
+                                                'display_name' => 'MaxMind - Insights (formerly Omni)',
+                                                'class' => 'Mautic\\CoreBundle\\IpLookup\\MaxmindOmniLookup',
+                                            ),
+                                            'maxmind_precision' => array(
+                                                'display_name' => 'MaxMind - GeoIP2 Precision',
+                                                'class' => 'Mautic\\CoreBundle\\IpLookup\\MaxmindPrecisionLookup',
+                                            ),
+                                            'maxmind_download' => array(
+                                                'display_name' => 'MaxMind - GeoLite2 City Download',
+                                                'class' => 'Mautic\\CoreBundle\\IpLookup\\MaxmindDownloadLookup',
+                                            ),
+                                            'telize' => array(
+                                                'display_name' => 'Telize',
+                                                'class' => 'Mautic\\CoreBundle\\IpLookup\\TelizeLookup',
+                                            ),
+                                        ),
+                                        5 => 'mautic.ip_lookup',
+                                    ),
                                     'alias' => 'coreconfig',
+                                ),
+                                'mautic.form.type.coreconfig.iplookup_download_data_store_button' => array(
+                                    'class' => 'Mautic\\CoreBundle\\Form\\Type\\IpLookupDownloadDataStoreButtonType',
+                                    'alias' => 'iplookup_download_data_store_button',
+                                    'arguments' => array(
+                                        0 => 'mautic.helper.template.date',
+                                        1 => 'translator',
+                                    ),
                                 ),
                                 'mautic.form.type.theme_list' => array(
                                     'class' => 'Mautic\\CoreBundle\\Form\\Type\\ThemeListType',
@@ -3387,6 +3517,12 @@ class appProdProjectContainer extends Container
                                         1 => 'monolog.logger.mautic',
                                     ),
                                     'tag' => 'kernel.event_subscriber',
+                                ),
+                                'mautic.configurator' => array(
+                                    'class' => 'Mautic\\InstallBundle\\Configurator\\Configurator',
+                                    'arguments' => array(
+                                        0 => 'mautic.factory',
+                                    ),
                                 ),
                                 'templating.helper.assets.class' => 'Mautic\\CoreBundle\\Templating\\Helper\\AssetsHelper',
                                 'templating.helper.slots.class' => 'Mautic\\CoreBundle\\Templating\\Helper\\SlotsHelper',
@@ -3491,17 +3627,88 @@ class appProdProjectContainer extends Container
                                 ),
                                 'mautic.menu.main' => array(
                                     'class' => 'Knp\\Menu\\MenuItem',
-                                    'factoryService' => 'mautic.menu.builder',
-                                    'factoryMethod' => 'mainMenu',
+                                    'factory' => array(
+                                        0 => '@mautic.menu.builder',
+                                        1 => 'mainMenu',
+                                    ),
                                     'tag' => 'knp_menu.menu',
                                     'alias' => 'main',
                                 ),
                                 'mautic.menu.admin' => array(
                                     'class' => 'Knp\\Menu\\MenuItem',
-                                    'factoryService' => 'mautic.menu.builder',
-                                    'factoryMethod' => 'adminMenu',
+                                    'factory' => array(
+                                        0 => '@mautic.menu.builder',
+                                        1 => 'adminMenu',
+                                    ),
                                     'tag' => 'knp_menu.menu',
                                     'alias' => 'admin',
+                                ),
+                                'mautic.ip_lookup.factory' => array(
+                                    'class' => 'Mautic\\CoreBundle\\Factory\\IpLookupFactory',
+                                    'arguments' => array(
+                                        0 => array(
+                                            'freegeoip' => array(
+                                                'display_name' => 'Freegeoip.net',
+                                                'class' => 'Mautic\\CoreBundle\\IpLookup\\FreegeoipLookup',
+                                            ),
+                                            'geobytes' => array(
+                                                'display_name' => 'Geobytes',
+                                                'class' => 'Mautic\\CoreBundle\\IpLookup\\GeobytesLookup',
+                                            ),
+                                            'geoips' => array(
+                                                'display_name' => 'GeoIPs',
+                                                'class' => 'Mautic\\CoreBundle\\IpLookup\\GeoipsLookup',
+                                            ),
+                                            'ipinfodb' => array(
+                                                'display_name' => 'IPInfoDB',
+                                                'class' => 'Mautic\\CoreBundle\\IpLookup\\IpinfodbLookup',
+                                            ),
+                                            'maxmind_country' => array(
+                                                'display_name' => 'MaxMind - Country Geolocation',
+                                                'class' => 'Mautic\\CoreBundle\\IpLookup\\MaxmindCountryLookup',
+                                            ),
+                                            'maxmind_omni' => array(
+                                                'display_name' => 'MaxMind - Insights (formerly Omni)',
+                                                'class' => 'Mautic\\CoreBundle\\IpLookup\\MaxmindOmniLookup',
+                                            ),
+                                            'maxmind_precision' => array(
+                                                'display_name' => 'MaxMind - GeoIP2 Precision',
+                                                'class' => 'Mautic\\CoreBundle\\IpLookup\\MaxmindPrecisionLookup',
+                                            ),
+                                            'maxmind_download' => array(
+                                                'display_name' => 'MaxMind - GeoLite2 City Download',
+                                                'class' => 'Mautic\\CoreBundle\\IpLookup\\MaxmindDownloadLookup',
+                                            ),
+                                            'telize' => array(
+                                                'display_name' => 'Telize',
+                                                'class' => 'Mautic\\CoreBundle\\IpLookup\\TelizeLookup',
+                                            ),
+                                        ),
+                                        1 => 'monolog.logger.mautic',
+                                        2 => 'mautic.http.connector',
+                                        3 => __DIR__,
+                                    ),
+                                ),
+                                'mautic.ip_lookup' => array(
+                                    'class' => 'Mautic\\CoreBundle\\IpLookup\\AbstractLookup',
+                                    'factory' => array(
+                                        0 => '@mautic.ip_lookup.factory',
+                                        1 => 'getService',
+                                    ),
+                                    'arguments' => array(
+                                        0 => 'maxmind_download',
+                                        1 => '',
+                                        2 => array(
+                                        ),
+                                        3 => 'mautic.http.connector',
+                                    ),
+                                ),
+                                'mautic.http.connector' => array(
+                                    'class' => 'Joomla\\Http\\Http',
+                                    'factory' => array(
+                                        0 => 'Joomla\\Http\\HttpFactory',
+                                        1 => 'getHttp',
+                                    ),
                                 ),
                                 'twig.controller.exception.class' => 'Mautic\\CoreBundle\\Controller\\ExceptionController',
                                 'monolog.handler.stream.class' => 'Mautic\\CoreBundle\\Monolog\\Handler\\PhpHandler',
@@ -3509,36 +3716,40 @@ class appProdProjectContainer extends Container
                         ),
                         'ip_lookup_services' => array(
                             'freegeoip' => array(
-                                'display_name' => 'freegeoip.net',
-                                'class' => 'Mautic\\CoreBundle\\IpLookup\\FreegeoipIpLookup',
+                                'display_name' => 'Freegeoip.net',
+                                'class' => 'Mautic\\CoreBundle\\IpLookup\\FreegeoipLookup',
                             ),
                             'geobytes' => array(
                                 'display_name' => 'Geobytes',
-                                'class' => 'Mautic\\CoreBundle\\IpLookup\\GeobytesIpLookup',
+                                'class' => 'Mautic\\CoreBundle\\IpLookup\\GeobytesLookup',
                             ),
                             'geoips' => array(
                                 'display_name' => 'GeoIPs',
-                                'class' => 'Mautic\\CoreBundle\\IpLookup\\GeoipsIpLookup',
+                                'class' => 'Mautic\\CoreBundle\\IpLookup\\GeoipsLookup',
                             ),
                             'ipinfodb' => array(
                                 'display_name' => 'IPInfoDB',
-                                'class' => 'Mautic\\CoreBundle\\IpLookup\\IpinfodbIpLookup',
+                                'class' => 'Mautic\\CoreBundle\\IpLookup\\IpinfodbLookup',
                             ),
                             'maxmind_country' => array(
                                 'display_name' => 'MaxMind - Country Geolocation',
-                                'class' => 'Mautic\\CoreBundle\\IpLookup\\MaxmindCountryIpLookup',
+                                'class' => 'Mautic\\CoreBundle\\IpLookup\\MaxmindCountryLookup',
                             ),
                             'maxmind_omni' => array(
                                 'display_name' => 'MaxMind - Insights (formerly Omni)',
-                                'class' => 'Mautic\\CoreBundle\\IpLookup\\MaxmindOmniIpLookup',
+                                'class' => 'Mautic\\CoreBundle\\IpLookup\\MaxmindOmniLookup',
                             ),
                             'maxmind_precision' => array(
                                 'display_name' => 'MaxMind - GeoIP2 Precision',
-                                'class' => 'Mautic\\CoreBundle\\IpLookup\\MaxmindPrecisionIpLookup',
+                                'class' => 'Mautic\\CoreBundle\\IpLookup\\MaxmindPrecisionLookup',
+                            ),
+                            'maxmind_download' => array(
+                                'display_name' => 'MaxMind - GeoLite2 City Download',
+                                'class' => 'Mautic\\CoreBundle\\IpLookup\\MaxmindDownloadLookup',
                             ),
                             'telize' => array(
                                 'display_name' => 'Telize',
-                                'class' => 'Mautic\\CoreBundle\\IpLookup\\TelizeIpLookup',
+                                'class' => 'Mautic\\CoreBundle\\IpLookup\\TelizeLookup',
                             ),
                         ),
                         'parameters' => array(
@@ -3560,7 +3771,7 @@ class appProdProjectContainer extends Container
                             'secret_key' => '',
                             'trusted_hosts' => NULL,
                             'trusted_proxies' => NULL,
-                            'rememberme_key' => '8c2d7f37728569f49127d2013ee16e82160223c8',
+                            'rememberme_key' => 'e906b3d03b1f23d736f4792b214e9a67d812b24d',
                             'rememberme_lifetime' => 31536000,
                             'rememberme_path' => '/',
                             'rememberme_domain' => '',
@@ -3570,8 +3781,10 @@ class appProdProjectContainer extends Container
                             'date_format_short' => 'D, M d',
                             'date_format_dateonly' => 'F j, Y',
                             'date_format_timeonly' => 'g:i a',
-                            'ip_lookup_service' => 'telize',
+                            'ip_lookup_service' => 'maxmind_download',
                             'ip_lookup_auth' => '',
+                            'ip_lookup_config' => array(
+                            ),
                             'transifex_username' => '',
                             'transifex_password' => '',
                             'update_stability' => 'stable',
@@ -3579,7 +3792,8 @@ class appProdProjectContainer extends Container
                             'cookie_domain' => '',
                             'cookie_secure' => NULL,
                             'cookie_httponly' => false,
-                            'do_not_track_ips' => NULL,
+                            'do_not_track_ips' => array(
+                            ),
                         ),
                     ),
                 ),
@@ -4105,6 +4319,7 @@ class appProdProjectContainer extends Container
                             'admin' => array(
                                 'mautic.category.menu.index' => array(
                                     'route' => 'mautic_category_index',
+                                    'access' => 'category:categories:view',
                                     'iconClass' => 'fa-folder',
                                     'id' => 'mautic_category_index',
                                 ),
@@ -4323,6 +4538,9 @@ class appProdProjectContainer extends Container
                                 ),
                                 'mautic.emailbuilder.subscriber' => array(
                                     'class' => 'Mautic\\EmailBundle\\EventListener\\BuilderSubscriber',
+                                ),
+                                'mautic.emailtoken.subscriber' => array(
+                                    'class' => 'Mautic\\EmailBundle\\EventListener\\TokenSubscriber',
                                 ),
                                 'mautic.email.campaignbundle.subscriber' => array(
                                     'class' => 'Mautic\\EmailBundle\\EventListener\\CampaignSubscriber',
@@ -4730,11 +4948,46 @@ class appProdProjectContainer extends Container
                         ),
                         'services' => array(
                             'other' => array(
-                                'mautic.configurator' => array(
-                                    'class' => 'Mautic\\InstallBundle\\Configurator\\Configurator',
+                                'mautic.install.configurator.step.check' => array(
+                                    'class' => 'Mautic\\InstallBundle\\Configurator\\Step\\CheckStep',
                                     'arguments' => array(
-                                        0 => $this->targetDirs[2],
-                                        1 => 'mautic.factory',
+                                        0 => 'mautic.configurator',
+                                        1 => $this->targetDirs[2],
+                                        2 => 'request_stack',
+                                    ),
+                                    'tag' => 'mautic.configurator.step',
+                                    'tagArguments' => array(
+                                        'priority' => 0,
+                                    ),
+                                ),
+                                'mautic.install.configurator.step.doctrine' => array(
+                                    'class' => 'Mautic\\InstallBundle\\Configurator\\Step\\DoctrineStep',
+                                    'arguments' => array(
+                                        0 => 'mautic.configurator',
+                                    ),
+                                    'tag' => 'mautic.configurator.step',
+                                    'tagArguments' => array(
+                                        'priority' => 1,
+                                    ),
+                                ),
+                                'mautic.install.configurator.step.email' => array(
+                                    'class' => 'Mautic\\InstallBundle\\Configurator\\Step\\EmailStep',
+                                    'arguments' => array(
+                                        0 => 'session',
+                                    ),
+                                    'tag' => 'mautic.configurator.step',
+                                    'tagArguments' => array(
+                                        'priority' => 3,
+                                    ),
+                                ),
+                                'mautic.install.configurator.step.user' => array(
+                                    'class' => 'Mautic\\InstallBundle\\Configurator\\Step\\UserStep',
+                                    'arguments' => array(
+                                        0 => 'session',
+                                    ),
+                                    'tag' => 'mautic.configurator.step',
+                                    'tagArguments' => array(
+                                        'priority' => 2,
                                     ),
                                 ),
                             ),
@@ -5156,6 +5409,9 @@ class appProdProjectContainer extends Container
                                 ),
                                 'mautic.pagebuilder.subscriber' => array(
                                     'class' => 'Mautic\\PageBundle\\EventListener\\BuilderSubscriber',
+                                ),
+                                'mautic.pagetoken.subscriber' => array(
+                                    'class' => 'Mautic\\PageBundle\\EventListener\\TokenSubscriber',
                                 ),
                                 'mautic.page.pointbundle.subscriber' => array(
                                     'class' => 'Mautic\\PageBundle\\EventListener\\PointSubscriber',
@@ -5703,26 +5959,34 @@ class appProdProjectContainer extends Container
                                 'mautic.user.manager' => array(
                                     'class' => 'Doctrine\\ORM\\EntityManager',
                                     'arguments' => 'Mautic\\UserBundle\\Entity\\User',
-                                    'factoryService' => 'doctrine',
-                                    'factoryMethod' => 'getManagerForClass',
+                                    'factory' => array(
+                                        0 => '@doctrine',
+                                        1 => 'getManagerForClass',
+                                    ),
                                 ),
                                 'mautic.user.repository' => array(
                                     'class' => 'Mautic\\UserBundle\\Entity\\UserRepository',
                                     'arguments' => 'Mautic\\UserBundle\\Entity\\User',
-                                    'factoryService' => 'mautic.user.manager',
-                                    'factoryMethod' => 'getRepository',
+                                    'factory' => array(
+                                        0 => '@mautic.user.manager',
+                                        1 => 'getRepository',
+                                    ),
                                 ),
                                 'mautic.permission.manager' => array(
                                     'class' => 'Doctrine\\ORM\\EntityManager',
                                     'arguments' => 'Mautic\\UserBundle\\Entity\\Permission',
-                                    'factoryService' => 'doctrine',
-                                    'factoryMethod' => 'getManagerForClass',
+                                    'factory' => array(
+                                        0 => '@doctrine',
+                                        1 => 'getManagerForClass',
+                                    ),
                                 ),
                                 'mautic.permission.repository' => array(
                                     'class' => 'Mautic\\UserBundle\\Entity\\PermissionRepository',
                                     'arguments' => 'Mautic\\UserBundle\\Entity\\Permission',
-                                    'factoryService' => 'mautic.permission.manager',
-                                    'factoryMethod' => 'getRepository',
+                                    'factory' => array(
+                                        0 => '@mautic.permission.manager',
+                                        1 => 'getRepository',
+                                    ),
                                 ),
                                 'mautic.user.provider' => array(
                                     'class' => 'Mautic\\UserBundle\\Security\\Provider\\UserProvider',
@@ -5948,6 +6212,44 @@ class appProdProjectContainer extends Container
                     ),
                 ),
             ),
+            'mautic.ip_lookup_services' => array(
+                'freegeoip' => array(
+                    'display_name' => 'Freegeoip.net',
+                    'class' => 'Mautic\\CoreBundle\\IpLookup\\FreegeoipLookup',
+                ),
+                'geobytes' => array(
+                    'display_name' => 'Geobytes',
+                    'class' => 'Mautic\\CoreBundle\\IpLookup\\GeobytesLookup',
+                ),
+                'geoips' => array(
+                    'display_name' => 'GeoIPs',
+                    'class' => 'Mautic\\CoreBundle\\IpLookup\\GeoipsLookup',
+                ),
+                'ipinfodb' => array(
+                    'display_name' => 'IPInfoDB',
+                    'class' => 'Mautic\\CoreBundle\\IpLookup\\IpinfodbLookup',
+                ),
+                'maxmind_country' => array(
+                    'display_name' => 'MaxMind - Country Geolocation',
+                    'class' => 'Mautic\\CoreBundle\\IpLookup\\MaxmindCountryLookup',
+                ),
+                'maxmind_omni' => array(
+                    'display_name' => 'MaxMind - Insights (formerly Omni)',
+                    'class' => 'Mautic\\CoreBundle\\IpLookup\\MaxmindOmniLookup',
+                ),
+                'maxmind_precision' => array(
+                    'display_name' => 'MaxMind - GeoIP2 Precision',
+                    'class' => 'Mautic\\CoreBundle\\IpLookup\\MaxmindPrecisionLookup',
+                ),
+                'maxmind_download' => array(
+                    'display_name' => 'MaxMind - GeoLite2 City Download',
+                    'class' => 'Mautic\\CoreBundle\\IpLookup\\MaxmindDownloadLookup',
+                ),
+                'telize' => array(
+                    'display_name' => 'Telize',
+                    'class' => 'Mautic\\CoreBundle\\IpLookup\\TelizeLookup',
+                ),
+            ),
             'mautic.site_url' => 'http://localhost:8888/EDENS%20Mautic',
             'mautic.webroot' => '',
             'mautic.cache_path' => $this->targetDirs[1],
@@ -5966,7 +6268,7 @@ class appProdProjectContainer extends Container
             'mautic.secret_key' => 'd6723f9fc3adcf2bb272e8a30a20b6a0808249825defdadecaa0b39b8be3ec28',
             'mautic.trusted_hosts' => NULL,
             'mautic.trusted_proxies' => NULL,
-            'mautic.rememberme_key' => '8c2d7f37728569f49127d2013ee16e82160223c8',
+            'mautic.rememberme_key' => 'e906b3d03b1f23d736f4792b214e9a67d812b24d',
             'mautic.rememberme_lifetime' => 31536000,
             'mautic.rememberme_path' => '/',
             'mautic.rememberme_domain' => '',
@@ -5976,8 +6278,10 @@ class appProdProjectContainer extends Container
             'mautic.date_format_short' => 'D, M d',
             'mautic.date_format_dateonly' => 'F j, Y',
             'mautic.date_format_timeonly' => 'g:i a',
-            'mautic.ip_lookup_service' => 'telize',
+            'mautic.ip_lookup_service' => 'maxmind_download',
             'mautic.ip_lookup_auth' => '',
+            'mautic.ip_lookup_config' => array(
+            ),
             'mautic.transifex_username' => '',
             'mautic.transifex_password' => '',
             'mautic.update_stability' => 'stable',
@@ -5985,7 +6289,8 @@ class appProdProjectContainer extends Container
             'mautic.cookie_domain' => '',
             'mautic.cookie_secure' => NULL,
             'mautic.cookie_httponly' => false,
-            'mautic.do_not_track_ips' => NULL,
+            'mautic.do_not_track_ips' => array(
+            ),
             'mautic.api_enabled' => false,
             'mautic.api_oauth2_access_token_lifetime' => 60,
             'mautic.api_oauth2_refresh_token_lifetime' => 14,
@@ -6083,7 +6388,7 @@ class appProdProjectContainer extends Container
                 'secret_key' => 'd6723f9fc3adcf2bb272e8a30a20b6a0808249825defdadecaa0b39b8be3ec28',
                 'trusted_hosts' => NULL,
                 'trusted_proxies' => NULL,
-                'rememberme_key' => '8c2d7f37728569f49127d2013ee16e82160223c8',
+                'rememberme_key' => 'e906b3d03b1f23d736f4792b214e9a67d812b24d',
                 'rememberme_lifetime' => 31536000,
                 'rememberme_path' => '/',
                 'rememberme_domain' => '',
@@ -6093,8 +6398,10 @@ class appProdProjectContainer extends Container
                 'date_format_short' => 'D, M d',
                 'date_format_dateonly' => 'F j, Y',
                 'date_format_timeonly' => 'g:i a',
-                'ip_lookup_service' => 'telize',
+                'ip_lookup_service' => 'maxmind_download',
                 'ip_lookup_auth' => '',
+                'ip_lookup_config' => array(
+                ),
                 'transifex_username' => '',
                 'transifex_password' => '',
                 'update_stability' => 'stable',
@@ -6102,7 +6409,8 @@ class appProdProjectContainer extends Container
                 'cookie_domain' => '',
                 'cookie_secure' => NULL,
                 'cookie_httponly' => false,
-                'do_not_track_ips' => NULL,
+                'do_not_track_ips' => array(
+                ),
                 'api_enabled' => false,
                 'api_oauth2_access_token_lifetime' => 60,
                 'api_oauth2_refresh_token_lifetime' => 14,
@@ -6186,6 +6494,8 @@ class appProdProjectContainer extends Container
             'router.request_context.scheme' => 'http',
             'router.request_context.base_url' => '/EDENS%20Mautic',
             'jms_serializer.camel_case_naming_strategy.class' => 'JMS\\Serializer\\Naming\\IdenticalPropertyNamingStrategy',
+            'console_exception_listener.class' => 'Mautic\\CoreBundle\\EventListener\\ConsoleExceptionListener',
+            'console_terminate_listener.class' => 'Mautic\\CoreBundle\\EventListener\\ConsoleTerminateListener',
             'mautic.security.restrictedconfigfields' => array(
                 0 => 'db_driver',
                 1 => 'db_host',

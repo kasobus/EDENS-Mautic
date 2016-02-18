@@ -155,6 +155,13 @@ class FormModel extends CommonFormModel
             $order++;
             $entity->addField($properties['id'], $field);
         }
+
+        // Persist if the entity is known
+        if ($entity->getId()) {
+            /** @var \Mautic\FormBundle\Model\FieldModel $fieldModel */
+            $fieldModel = $this->factory->getModel('form.field');
+            $fieldModel->saveEntities($entity->getFields());
+        }
     }
 
     /**
@@ -164,13 +171,22 @@ class FormModel extends CommonFormModel
     public function deleteFields(Form $entity, $sessionFields)
     {
         if (empty($sessionFields)) {
+
             return;
         }
+
         $existingFields = $entity->getFields();
+        $deleteFields   = array();
         foreach ($sessionFields as $fieldId) {
             if (isset($existingFields[$fieldId])) {
                 $entity->removeField($fieldId, $existingFields[$fieldId]);
+                $deleteFields[] = $fieldId;
             }
+        }
+
+        // Delete fields from db
+        if (count($deleteFields)) {
+            $this->factory->getModel('form.field')->deleteEntities($deleteFields);
         }
     }
 
@@ -219,6 +235,13 @@ class FormModel extends CommonFormModel
             $order++;
             $entity->addAction($properties['id'], $action);
         }
+
+        // Persist if form is being edited
+        if ($entity->getId()) {
+            /** @var \Mautic\FormBundle\Model\ActionModel $actionModel */
+            $actionModel = $this->factory->getModel('form.action');
+            $actionModel->saveEntities($entity->getActions());
+        }
     }
 
     /**
@@ -228,7 +251,7 @@ class FormModel extends CommonFormModel
     {
         $isNew = ($entity->getId()) ? false : true;
 
-        if ($isNew) {
+        if ($isNew && !$entity->getAlias()) {
             $alias = $this->cleanAlias($entity->getName(), '', 10);
             $entity->setAlias($alias);
         }
@@ -490,6 +513,8 @@ class FormModel extends CommonFormModel
 
                 switch ($f->getType()) {
                     case 'text':
+                    case 'email':
+                    case 'hidden':
                         if (preg_match('/<input(.*?)id="mauticform_input_'.$formName.'_'.$alias.'"(.*?)value="(.*?)"(.*?)\/>/i', $formHtml, $match)) {
                             $replace  = '<input'.$match[1].'id="mauticform_input_'.$formName.'_'.$alias.'"'.$match[2].'value="'.urldecode($value).'"'.$match[4].'/>';
                             $formHtml = str_replace($match[0], $replace, $formHtml);

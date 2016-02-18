@@ -64,10 +64,10 @@ class Stat extends \Mautic\EmailBundle\Entity\Stat implements \Doctrine\ORM\Prox
     public function __sleep()
     {
         if ($this->__isInitialized__) {
-            return array('__isInitialized__', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'id', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'email', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'lead', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'emailAddress', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'list', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'ipAddress', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'dateSent', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'isRead', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'isFailed', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'viewedInBrowser', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'dateRead', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'trackingHash', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'retryCount', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'source', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'sourceId', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'tokens', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'copy', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'openCount', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'lastOpened', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'openDetails');
+            return array('__isInitialized__', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'id', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'email', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'lead', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'emailAddress', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'list', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'ipAddress', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'dateSent', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'isRead', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'isFailed', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'viewedInBrowser', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'dateRead', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'trackingHash', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'retryCount', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'source', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'sourceId', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'tokens', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'copy', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'storedCopy', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'openCount', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'lastOpened', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'openDetails');
         }
 
-        return array('__isInitialized__', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'id', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'email', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'lead', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'emailAddress', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'list', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'ipAddress', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'dateSent', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'isRead', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'isFailed', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'viewedInBrowser', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'dateRead', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'trackingHash', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'retryCount', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'source', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'sourceId', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'tokens', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'copy', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'openCount', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'lastOpened', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'openDetails');
+        return array('__isInitialized__', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'id', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'email', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'lead', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'emailAddress', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'list', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'ipAddress', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'dateSent', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'isRead', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'isFailed', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'viewedInBrowser', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'dateRead', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'trackingHash', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'retryCount', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'source', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'sourceId', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'tokens', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'copy', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'storedCopy', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'openCount', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'lastOpened', '' . "\0" . 'Mautic\\EmailBundle\\Entity\\Stat' . "\0" . 'openDetails');
     }
 
     /**
@@ -659,6 +659,28 @@ class Stat extends \Mautic\EmailBundle\Entity\Stat implements \Doctrine\ORM\Prox
         $this->__initializer__ && $this->__initializer__->__invoke($this, 'setOpenDetails', array($openDetails));
 
         return parent::setOpenDetails($openDetails);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getStoredCopy()
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'getStoredCopy', array());
+
+        return parent::getStoredCopy();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setStoredCopy(\Mautic\EmailBundle\Entity\Copy $storedCopy)
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'setStoredCopy', array($storedCopy));
+
+        return parent::setStoredCopy($storedCopy);
     }
 
 }

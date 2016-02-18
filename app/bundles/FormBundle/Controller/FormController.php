@@ -213,8 +213,6 @@ class FormController extends CommonFormController
             $activeFormFields[] = $field;
         }
 
-        $model->getEntities(array('factory' => $this->factory));
-
         return $this->delegateView(array(
             'viewParameters'  => array(
                 'activeForm'  => $activeForm,
@@ -245,7 +243,8 @@ class FormController extends CommonFormController
     /**
      * Generates new form and processes post data
      *
-     * @return \Symfony\Component\HttpFoundation\JsonResponse|Response
+     * @return array|\Symfony\Component\HttpFoundation\JsonResponse|\Symfony\Component\HttpFoundation\RedirectResponse|Response
+     * @throws \Exception
      */
     public function newAction()
     {
@@ -293,16 +292,24 @@ class FormController extends CommonFormController
                         $model->setFields($entity, $fields);
 
                         try {
-                            //save the form first so that new fields are available to actions
-                            $model->saveEntity($entity);
-
                             if ($entity->isStandalone()) {
-                                //only save actions that are not to be deleted
-                                $actions  = array_diff_key($modifiedActions, array_flip($deletedActions));
+                                // Set alias to prevent SQL errors
+                                $alias = $model->cleanAlias($entity->getName(), '', 10);
+                                $entity->setAlias($alias);
 
-                                //now set the actions
-                                $model->setActions($entity, $actions, $fields);
+                                // Save the form first and new actions so that new fields are available to actions.
+                                // Using the repository function to not trigger the listeners twice.
+                                $model->getRepository()->saveEntity($entity);
+
+                                // Only save actions that are not to be deleted
+                                $actions = array_diff_key($modifiedActions, array_flip($deletedActions));
+
+                                // Set and persist actions
+                                $model->setActions($entity, $actions);
                             }
+
+                            // Save and trigger listeners
+                            $model->saveEntity($entity, $form->get('buttons')->get('save')->isClicked());
 
                             $this->addFlash('mautic.core.notice.created', array(
                                 '%name%'      => $entity->getName(),
@@ -327,6 +334,10 @@ class FormController extends CommonFormController
                         } catch (\Exception $e) {
                             $form['name']->addError(new FormError($this->get('translator')->trans('mautic.form.schema.failed', array(), 'validators')));
                             $valid = false;
+
+                            if ('dev' == $this->container->getParameter('kernel.environment')) {
+                                throw $e;
+                            }
                         }
                     }
                 }
@@ -412,7 +423,8 @@ class FormController extends CommonFormController
      */
     public function editAction($objectId, $ignorePost = false, $forceTypeSelection = false)
     {
-        $model      = $this->factory->getModel('form.form');
+        /** @var \Mautic\FormBundle\Model\FormModel $model */
+        $model      = $this->factory->getModel('form');
         $formData   = $this->request->request->get('mauticform');
         $sessionId  = isset($formData['sessionId']) ? $formData['sessionId'] : null;
 
@@ -506,28 +518,40 @@ class FormController extends CommonFormController
                         $model->setFields($entity, $fields);
                         $model->deleteFields($entity, $deletedFields);
 
-                        //save the form first so that new fields are available to actions
-                        $model->saveEntity($entity, $form->get('buttons')->get('save')->isClicked());
-
-                        // Reset objectId to entity ID (can be session ID in case of cloned entity)
-                        $objectId = $entity->getId();
-
                         if ($entity->isStandalone()) {
-                            //now set the actions
-                            $model->setActions($entity, $actions, $fields);
+                            if (!$alias = $entity->getAlias()) {
+                                $alias = $model->cleanAlias($entity->getName(), '', 10);
+                                $entity->setAlias($alias);
+                            }
+
+                            // save the form first so that new fields are available to actions
+                            // use the repository method to not trigger listeners twice
+                            $model->getRepository()->saveEntity($entity);
+
+                            if (count($actions)) {
+                                // Now set and persist the actions
+                                $model->setActions($entity, $actions);
+                            }
 
                             // Delete deleted actions
-                            $this->factory->getModel('form.action')->deleteEntities($deletedActions);
+                            if (count($deletedActions)) {
+                                $this->factory->getModel('form.action')->deleteEntities($deletedActions);
+                            }
                         } else {
                             // Clear the actions
                             $entity->clearActions();
 
                             // Delete all actions
-                            $this->factory->getModel('form.action')->deleteEntities(array_keys($modifiedActions));
+                            if (count($modifiedActions)) {
+                                $this->factory->getModel('form.action')->deleteEntities(array_keys($modifiedActions));
+                            }
                         }
 
-                        // Delete fields
-                        $this->factory->getModel('form.field')->deleteEntities($deletedFields);
+                        // Persist and execute listeners
+                        $model->saveEntity($entity, $form->get('buttons')->get('save')->isClicked());
+
+                        // Reset objectId to entity ID (can be session ID in case of cloned entity)
+                        $objectId = $entity->getId();
 
                         $this->addFlash(
                             'mautic.core.notice.updated',
